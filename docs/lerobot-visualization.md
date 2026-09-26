@@ -38,7 +38,9 @@ Required frame columns (parquet): `timestamp`, `frame_index`, `episode_index`,
 
 Deep link after upload:
 
-`https://huggingface.co/spaces/lerobot/visualize_dataset/<org>/<dataset>`
+`https://lerobot-visualize-dataset.hf.space/<org>/<dataset>`
+
+(Note: `huggingface.co/spaces/lerobot/visualize_dataset/<org>/<dataset>` returns 404; use the `.hf.space` host, or open the Space and paste the repo id.)
 
 ## RoboFAC preview (this repo)
 
@@ -99,7 +101,7 @@ PY
 
 Then open:
 
-https://huggingface.co/spaces/lerobot/visualize_dataset/cedricxie/robofac-lerobot-preview
+https://lerobot-visualize-dataset.hf.space/cedricxie/robofac-lerobot-preview
 
 If Grok Bot needs a write token later, use the secret-request flow rather than
 pasting `HF_TOKEN` into chat.
