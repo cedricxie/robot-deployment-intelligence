@@ -57,6 +57,7 @@ python scripts/convert_robofac_to_lerobot.py \
   --raw-dir data/raw/robofac \
   --out-dir data/processed/robofac_lerobot_preview \
   --max-episodes 32 \
+  --include-realworld --max-realworld-episodes 18 \
   --seed 42 \
   --repo-id cedricxie/robofac-lerobot-preview \
   --to-v30
@@ -65,13 +66,18 @@ python scripts/convert_robofac_to_lerobot.py \
 What the script does:
 
 1. Scans `simulation_data/**/ToolsTask_traj.{json,h5}` + matching `{unique_id}.mp4`.
-2. Selects a diverse mix (success / forget-* / gripper_error / other failure).
-3. Writes LeRobot **v2.1** (hardlinks/copies videos; parquet from H5 actions).
-4. With `--to-v30`, runs `python -m lerobot.scripts.convert_dataset_v21_to_v30`.
-5. Validates structure and tries `LeRobotDataset(...)` load.
+2. Selects a diverse sim mix (success / forget-* / gripper_error / other failure).
+3. With `--include-realworld`, also samples `realworld_data/so100_*/…/observation.images.above`
+   evenly across tasks (~3×6 = 18 by default). Remaps that camera → `observation.images.main`,
+   fills 8-D **zero** action/state, tags tasks `realworld: so100_… [failure]`, sets
+   `next.success=False` for `*_error`, and re-encodes AV1 → H.264 for Hub playback.
+4. Writes a **combined** LeRobot **v2.1** preview (same feature schema for sim + real).
+5. With `--to-v30`, runs `python -m lerobot.scripts.convert_dataset_v21_to_v30`.
+6. Validates structure and tries `LeRobotDataset(...)` load.
 
-Task text comes from `training_qa.json` when available; each task string is tagged
-`[success]` or `[failure]` from the traj JSON `success` flag.
+Sim task text comes from `training_qa.json` when available; each string is tagged
+`[success]` / `[failure]`. Realworld NL hints come from `test_qa_realworld/` when present.
+Native realworld resolution (e.g. 640×480) may differ from sim (1024×1024) — preview only.
 
 ## Upload to Hugging Face Hub
 
