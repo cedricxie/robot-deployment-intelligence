@@ -1,6 +1,6 @@
 # Robot Deployment Intelligence MVP — Implementation Plan
 
-**Status:** Draft (docs-only, revision 2)  
+**Status:** Draft (docs-only, revision 3)  
 **Date:** 2026-09-26  
 **Owner:** cedricxie  
 **Source of truth for implementation.** Refined from the original research brief plus ChatGPT review (Approve with comments) focused on goals and validation.
@@ -106,7 +106,7 @@ Answer must be supported by quantitative metrics **and** human evaluation.
 
 ### Freeze before coding M0
 
-Must freeze: Project Goals, success definition, dataset choice, Episode schema, validation protocol, hidden-split policy, non-goals.
+Must freeze: Project Goals, success definition, dataset choice, Episode schema, validation protocol, hidden-split policy, non-goals, **and §5.5 pre-MVP GT open questions (items 1–6)**.
 
 May defer: which VLM/LLM, Jev availability, dashboard stack details, RSI agent framework, DB choice, cloud deploy.
 
@@ -203,6 +203,92 @@ Logged experiments under `experiments/`; ≥3 iterations; hidden-eval comparison
 | **M3** Cascade | ≥3× (stretch 5×) fewer deep calls; recall drop ≤5% | Cascade saves nothing or tanks recall |
 | **M4** Evaluator improvement loop | ≥3 experiments; ≥1 hidden improve **or** written postmortem; no auto-promote | Only overfits public/dev |
 | **M5** Demo | Full demo outputs + metrics + human “would act” sample | Pretty UI without evidence |
+
+
+### 5.5 Ground-truth gaps, weak labels, and human confirmation
+
+RoboFAC gives a strong **detection / diagnosis / correction** substrate, but several MVP acceptance metrics need labels the raw dataset does not ship as first-class fields. This section freezes how we fill those gaps **without** treating LLM-vs-LLM agreement as final engineer-actionability GT.
+
+#### What RoboFAC already provides vs what we must add
+
+| Need for MVP gates | RoboFAC typically provides | Must we add? | Notes |
+|--------------------|----------------------------|--------------|-------|
+| Failure **detection** (`success` / fail) | Yes — episode `success` + failure trajectories; QA includes failure detection | No (map into `ground_truth.success`) | Primary objective metric |
+| Failure **type** / identification | Partially — paper taxonomy (e.g. orientation deviation, step omission, wrong target, timing, grasping, position deviation) + QA “failure identification”; not always a single structured enum on every episode JSON | **Optional enum** — map when present; otherwise nullable / weak-label | Do not block M0 on perfect taxonomy |
+| Diagnosis / explanation / correction text | Yes — via QA dimensions (explanation, high/low-level correction) | Map when usable; nullable otherwise | Spot-check quality; not automatic scoring blocker |
+| **Important / high-value failure** (attention-efficiency numerator) | No first-class field | **Yes — weak label + human confirm** | Required for Q1 / criterion B |
+| **Attention must-keep** (should this episode stay in the review budget?) | No | **Yes — weak label + human confirm** | Overlaps with “important” but may include rare/novel/safety-adjacent cases |
+| **Cluster coherence** (cluster = one engineering issue?) | No | **Yes — human spot-check** (rules/LLM may draft notes) | Gate for M2 / criterion C |
+| **Actionability** (“would an engineer act?”) | No | **Yes — human confirm only** | Criterion E; LLM draft is advisory |
+| Severity (high-severity recall) | No dedicated severity score | Proxy from type / impact rules until confirmed | Document proxy; do not invent precision |
+
+Schema extension (additive; keep existing nullable GT fields):
+
+```yaml
+ground_truth:
+  # …existing fields…
+  important_failure: bool | null
+  attention_must_keep: bool | null
+  cluster_coherence: bool | null          # usually filled at cluster-sample level
+  actionability_would_act: bool | null    # human only for acceptance
+  failure_type: str | null                # optional enum; map RoboFAC when present
+  label_status: draft | chatgpt_reviewed | human_confirmed
+  label_source: rules | llm | hybrid | human
+  label_notes: str | null
+  label_disputed: bool | null
+```
+
+#### Weak-label generation
+
+1. **Rules first** where deterministic signals exist (e.g. `success=false` → candidate failure; type map from RoboFAC identification answers; severity proxy from type → impact table).  
+2. **LLM draft** for product-facing fields RoboFAC lacks: `important_failure`, `attention_must_keep`, draft actionability rationale, optional cluster-coherence notes.  
+3. Every generated label starts as `label_status: draft` with `label_source: rules | llm | hybrid`.  
+4. Weak labels may drive **development** ranking experiments and UI prototypes; they **do not** count toward acceptance gates until promoted.
+
+#### Workflow: generate → ChatGPT review → human confirm → promote
+
+```text
+Assistant generates candidate GT (rules + LLM)
+        ↓
+ChatGPT Career / review pass
+  - consistency vs RoboFAC success/type
+  - flag disputes / overconfident importance
+  - advisory only (does not auto-promote)
+        ↓  label_status → chatgpt_reviewed
+Human spot-check
+  - all disputed items
+  - random sample of non-disputed
+  - actionability samples always human
+        ↓  only then
+label_status → human_confirmed
+        ↓
+Acceptance gates (Q1–Q5, criteria A–E) may use these labels as GT
+```
+
+**Promotion rule:** only `human_confirmed` rows count as ground truth for milestone acceptance and hidden-eval scoring of attention / importance / actionability / cluster usefulness. `draft` and `chatgpt_reviewed` stay in the label store for audit and iteration.
+
+#### Explicit limits
+
+- **LLM-vs-LLM agreement is not engineer-actionability final GT.** ChatGPT (or any other model) reviewing another model’s draft cannot close criterion E.  
+- ChatGPT review is for **consistency, dispute surfacing, and checklist completeness** — not a substitute for human “would act” judgment.  
+- Detection metrics may use RoboFAC `success` directly; product metrics that RoboFAC does not define must follow the promotion rule above.
+
+#### Pre-MVP open questions (freeze before M0 / M1 coding)
+
+Resolve and record answers in this plan (or a linked ADR) **before** coding M0/M1 acceptance harnesses that depend on them:
+
+| # | Open decision | Why it blocks | Suggested default (to debate) |
+|---|---------------|---------------|-------------------------------|
+| 1 | Definition of **important failure** | Numerator of attention efficiency | High impact **or** repeated **or** novel/safety-adjacent; write operational rubric |
+| 2 | **Severity proxy** mapping | High-severity recall gate | Map RoboFAC failure types → {low, mid, high}; human confirm on sample |
+| 3 | Spot-check **sample sizes** | Cost vs statistical meaning | e.g. all disputes + ≥30 random importance labels + ≥20 actionability + ≥10 clusters |
+| 4 | **Who confirms** | Accountability | Owner (`cedricxie`) for MVP; optional second reviewer later |
+| 5 | **`failure_type` taxonomy** | Schema + metrics | Prefer RoboFAC six-class map; extend only with `other` / `unknown` |
+| 6 | Is ChatGPT review **advisory only**? | Workflow / automation risk | **Yes** — advisory; never auto-`human_confirmed` |
+| 7 | Split policy | Leakage | **Already frozen (§5.2):** seed `42`; 60/20/20; improvement loop must not load hidden labels |
+
+Items 1–6 are **not** frozen until checked off here after discussion (ChatGPT critique + human decision). Item 7 is already frozen.
+
 
 ---
 
@@ -457,7 +543,7 @@ Python 3.11+, pytest, pydantic, numpy, scikit-learn, streamlit, pyyaml.
 |------|------------|
 | RoboFAC download/schema mismatch | Fixture-first; adapter isolation |
 | No API keys | Mock providers; call-count cost proxies |
-| Incomplete labels | Nullable GT; skip undefined in metrics; spot-check diagnosis |
+| Incomplete labels / product GT gaps | Nullable GT; §5.5 weak labels + ChatGPT review + human_confirmed only for gates; spot-check diagnosis |
 | Diagnosis harder than detection | Separate metrics; do not block MVP on diagnosis accuracy |
 | Improvement loop overfits | Hidden split sealed; promote gate |
 | Scope creep | Non-goals + freeze list; thin slice before M2–M4 |
@@ -497,6 +583,7 @@ If blocked, choose the simplest runnable substitute, log it, continue.
 |-----|--------|
 | 1 | Initial scoped plan (docs-only PR) |
 | 2 | Added Project Goals + Validation protocol; M0.5 thin slice; M4 renamed to Evaluator Improvement Loop; Streamlit deferred to M5; success criteria emphasize attention efficiency, diagnosis separation, actionability; added `experiments/` + `ontology/`; expanded non-goals (no realtime, no universal ontology) |
+| 3 | Added §5.5 Ground-truth gaps / weak labels / ChatGPT review + human confirm workflow; promotion rule (`human_confirmed` only for acceptance gates); pre-MVP open-questions checklist; freeze list + incomplete-labels risk updated |
 
 ---
 
