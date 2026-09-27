@@ -47,7 +47,7 @@ def test_adapter_failure_position_deviation():
     assert len(eps) == 1
     ep = eps[0]
     assert ep.ground_truth.success is False
-    assert ep.ground_truth.failure_type == "Position deviation"
+    assert ep.ground_truth.failure_type == "position_deviation"
     assert ep.ground_truth.diagnosis
     assert ep.ground_truth.correction
     assert ep.metadata.get("failure_subtask")
@@ -59,7 +59,7 @@ def test_adapter_failure_step_omission():
     assert len(eps) == 1
     ep = eps[0]
     assert ep.ground_truth.success is False
-    assert ep.ground_truth.failure_type == "Step omission"
+    assert ep.ground_truth.failure_type == "step_omission"
     _assert_no_leak(ep)
 
 
@@ -73,4 +73,4 @@ def test_load_all_sample_fixtures():
     assert successes
     assert len(failures) >= 1
     types = {e.ground_truth.failure_type for e in failures}
-    assert "Position deviation" in types
+    assert "position_deviation" in types

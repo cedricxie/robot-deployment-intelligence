@@ -20,14 +20,14 @@ def test_episode_roundtrip_with_gt_and_backend():
         metadata={"source": "fixture"},
         ground_truth=GroundTruth(
             success=False,
-            failure_type="Position deviation",
+            failure_type="position_deviation",
             diagnosis="missed grasp",
         ),
         model_output=ModelOutput(decision_backend="baseline", evidence=["frame:3"]),
     )
     data = ep.model_dump()
     restored = Episode.model_validate(data)
-    assert restored.ground_truth.failure_type == "Position deviation"
+    assert restored.ground_truth.failure_type == "position_deviation"
     assert restored.model_output.decision_backend == "baseline"
 
 

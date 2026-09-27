@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 from data.schemas.episode import Episode, GroundTruth
+from ontology.robofac_type_map import map_robofac_failure_type, map_robofac_success
 
 # RoboFAC QA section keys (adapter-private)
 _FAIL_DETECT = "Failure detection"
@@ -40,12 +41,6 @@ def _parse_success(annos: dict[str, Any]) -> bool | None:
     return None
 
 
-def _normalize_failure_type(text: str | None) -> str | None:
-    if not text:
-        return None
-    return text.rstrip(".").strip() or None
-
-
 class RoboFACAdapter:
     """Load RoboFAC-style JSON samples into unified Episode records."""
 
@@ -75,8 +70,9 @@ class RoboFACAdapter:
         correction = _assistant_text(annos, _HIGH_CORR) or _assistant_text(
             annos, _LOW_CORR
         )
-        failure_type = _normalize_failure_type(_assistant_text(annos, _FAIL_ID))
-        success = _parse_success(annos)
+        raw_type = _assistant_text(annos, _FAIL_ID)
+        success = map_robofac_success(_parse_success(annos))
+        failure_type = map_robofac_failure_type(raw_type)
 
         metadata: dict[str, Any] = {
             "source": "robofac",
