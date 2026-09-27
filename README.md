@@ -39,7 +39,7 @@ Runnable rungs: **Random** → **Frequency-only** → **BaselineFastDecisionEngi
 | Random | Seeded Bernoulli success/fail + uniform type |
 | Frequency-only | Majority success/fail + most-common fail type from **development** reference empirical freqs (constant predictor) |
 | BaselineFast | GT-free path/id keyword cues (+ optional prior / type keywords). Default ship path |
-| JEV (stub) | GT-free path + instruction cues with cost proxy (calls / tokens / stub units). Cost–quality experiment — **not** assumed superior. Modes: stub (default), off, real (raises until adapter exists) |
+| JEV (stub / llm_proxy) | GT-free path + instruction cues with cost proxy. `llm_proxy` = deterministic systemone role-play (NOT live Jev). Modes: stub (default), llm_proxy, off, real (raises until adapter exists) |
 
 Eval harness (`evaluation/harness.py`) emits side-by-side columns: detection P/R/F1, failure-type agreement, **proxy retention**, **review reduction** (Top-K), **cost proxy**. Proxy labels come from `proxy_importance` (A∧(B∨C∨D)); improvement-loop helpers still must not load `hidden_eval`.
 
@@ -51,6 +51,14 @@ Full ladder + cost–quality report (`reports/m1_failure_intelligence.md`):
 
 ```bash
 JEV_MODE=stub python scripts/m1_failure_intelligence.py --config configs/m1_failure_intelligence.json
+```
+
+### M1 JEV llm_proxy (role-play)
+
+Baseline vs deterministic systemone-shaped judge (`reports/m1_jev_llm_proxy.md`). **Not** live Jev API.
+
+```bash
+JEV_MODE=llm_proxy python scripts/m1_jev_llm_proxy.py
 ```
 
 ## M0.5 thin slice (PR-impl-5)
