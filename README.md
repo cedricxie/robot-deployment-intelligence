@@ -21,6 +21,8 @@ without training robot policies.
 ## Quick links
 
 - [MVP Implementation Plan](docs/mvp-plan.md) — **read Goals + Validation before coding**
+- [LeRobot visualization preview](docs/lerobot-visualization.md) — RoboFAC→Hub (`cedricxie/robofac-lerobot-preview`)
+- [Dataset inventory](data/DATA.md)
 
 ## Principles
 
