@@ -8,7 +8,8 @@ without training robot policies.
 
 ## Status
 
-- [x] Implementation plan (`docs/mvp-plan.md`) — rev 6 (proxy-important / review-priority + baseline ladder + impl PR plan)
+- [x] Implementation plan (`docs/mvp-plan.md`) — rev 6.1 (proxy-important / review-priority + baseline ladder + impl PR plan + PR review gate)
+- **Implementation PR gate:** after every update, obtain ChatGPT Career **Approve** (not **Need changes**), then ask the user for final merge confirmation.
 - [ ] M0 Dataset pipeline
 - [ ] M0.5 End-to-end thin slice
 - [ ] M1 Failure intelligence

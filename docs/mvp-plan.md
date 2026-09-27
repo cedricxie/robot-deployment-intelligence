@@ -1,9 +1,9 @@
 # Robot Deployment Intelligence MVP — Implementation Plan
 
-**Status:** Draft (docs-only, revision 6)  
+**Status:** Draft (docs-only, revision 6.1)
 **Date:** 2026-09-26  
 **Owner:** cedricxie  
-**Source of truth for implementation.** Refined from the original research brief plus ChatGPT reviews; **rev 5 pivot** (automatable core, rule-based proxy importance, Baseline↔JEV); **rev 6** folds Career rev5 clarifications (terminology, baseline ladder, cluster-purity honesty, diagnosis metrics, hidden isolation) and adds a sequenced **implementation-PR plan**.
+**Source of truth for implementation.** Refined from the original research brief plus ChatGPT reviews; **rev 5 pivot** (automatable core, rule-based proxy importance, Baseline↔JEV); **rev 6** folds Career rev5 clarifications (terminology, baseline ladder, cluster-purity honesty, diagnosis metrics, hidden isolation) and adds a sequenced **implementation-PR plan**. **Rev 6.1** adds the standing ChatGPT Career review/merge gate for every implementation PR.
 
 ---
 
@@ -701,6 +701,10 @@ Docs PR **#1** (`docs/mvp-implementation-plan`) freezes the plan. **Application 
 
 **Principles for impl PRs:** one milestone capability per PR when practical; fixtures + tests in the same PR as the code they protect; mock providers by default; no hidden-label use for tuning.
 
+### 14.0 Standing implementation-PR gate
+
+**For every implementation PR:** after each update, send the updated PR to **ChatGPT Career** for review. Iterate on the PR and resubmit after each update until the verdict is exactly **Approve** (not **Need changes**). Only after an **Approve** verdict, ask the user for final confirmation on whether to merge.**
+
 ### 14.1 Milestone → PR map
 
 | Milestone | Primary impl PRs | Exit evidence |
@@ -878,9 +882,10 @@ We hit MVP when **all** of the following are true (tie to §4 Qs and §9 criteri
 | 4 | ChatGPT Career GT-workflow review (conditional approve): rename framing to human-adjudicated reference/benchmark labels (keep `human_confirmed` field); P0 freezes + defaults (lifecycle/isolation, important=ANY severity/freq/cost/novelty/actionable, severity 3/2/1 heuristic, spot-check ~20×5 + 20–30 actionability, confirmer=robotics expert else two reviewers); weak/synthetic for dev only; risks (distribution shift, LLM-review bias, hidden contamination, early taxonomy freeze); detection≠diagnosis, important⊥taxonomy, cluster/actionability need human adjudication |
 | 5 | **Pivot — no business-critical / human importance GT for MVP.** Automatable core = success/fail + failure type + common/rare/novelty (+ cluster/dedup, Top-K, cascade, auto reports). Proxy importance frozen: A fail required; B rare; C high-freq; D novelty; acceptance **A∧(B∨C∨D)**; E actionable-phrase + F cascade-uncertainty = ranking bonuses only. Diagnosis = weak output (not hard gate). Actionability / true criticality = post-MVP. Cluster gate = auto purity vs `failure_type`; human spot-check optional. Human role shrunk (no severity referee). ChatGPT/weak-label path = taxonomy drafts advisory only. **Required Baseline↔JEV comparison** on same splits/metrics (JEV stub OK; comparison in-scope even if ship is Baseline-only). Updated goals, freezes, Qs, §5, criteria, milestones, risks, assumptions. |
 | 6 | **ChatGPT Career rev5 clarifications + development PR plan.** Terminology: prefer **proxy-important / review-priority** over “high-value”; review priority ≠ business importance. Baseline hierarchy: Random → Frequency-only → BaselineFastDecisionEngine → JEV; JEV = cost–quality hypothesis (not assumed superiority). Cluster purity = label consistency only (not eng usefulness). Diagnosis: type agreement primary; text similarity de-emphasized. Hidden labels: harness final scoring only — never for prompt/threshold/RSI/routing/weight tuning. New **§14 MVP development plan** with PR-impl-1…10 (scope, acceptance, depends-on, M0→M5 map, final done checklist). Review note: `docs/reviews/chatgpt-rev5-review.md`. Freeze list + README → rev 6. |
+| 6.1 | **Standing implementation-PR review gate.** After every PR update, obtain ChatGPT Career review and iterate until the verdict is **Approve** (not **Need changes**); only then request the user’s final merge confirmation. |
 
 ---
 
 ## 17. PR intent
 
-Docs-only plan freeze before M0 coding. Implementation follows this document via **PR-impl-1…10** (§14), starting at **M0**, then **M0.5** before larger infrastructure. Rev 5 locked automatable-core + proxy-importance + Baseline↔JEV; **rev 6** locks terminology, baseline ladder, cluster-purity honesty, diagnosis metric priority, hidden-isolation, and the sequenced impl-PR plan.
+Docs-only plan freeze before M0 coding. Implementation follows this document via **PR-impl-1…10** (§14), starting at **M0**, then **M0.5** before larger infrastructure. Rev 5 locked automatable-core + proxy-importance + Baseline↔JEV; **rev 6** locks terminology, baseline ladder, cluster-purity honesty, diagnosis metric priority, hidden-isolation, and the sequenced impl-PR plan; **rev 6.1** adds the standing implementation-PR review/merge gate.
