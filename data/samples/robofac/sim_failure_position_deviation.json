@@ -1,0 +1,68 @@
+{
+  "fixture-sim-fail-pos-001": {
+    "video": "MicrowaveTask-mug/spoon_reach_view2/fixture-sim-fail-pos-001.mp4",
+    "task": "MicrowaveTask",
+    "annos": {
+      "Task identification": [
+        {
+          "from": "human",
+          "value": "<image>\nWhat task is the robot engaged in?"
+        },
+        {
+          "from": "assistant",
+          "value": "Put the spoon in the mug and put them in the microwave"
+        }
+      ],
+      "Failure detection": [
+        {
+          "from": "human",
+          "value": "<image>\nWas it successful?"
+        },
+        {
+          "from": "assistant",
+          "value": "No."
+        }
+      ],
+      "Failure identification": [
+        {
+          "from": "human",
+          "value": "<image>\nError type?"
+        },
+        {
+          "from": "assistant",
+          "value": "Position deviation."
+        }
+      ],
+      "Failure locating": [
+        {
+          "from": "human",
+          "value": "<image>\nWhich subtask failed?"
+        },
+        {
+          "from": "assistant",
+          "value": "Reach for the spoon."
+        }
+      ],
+      "Failure explanation": [
+        {
+          "from": "human",
+          "value": "<image>\nExplain the failure."
+        },
+        {
+          "from": "assistant",
+          "value": "The end effector missed the spoon due to lateral offset."
+        }
+      ],
+      "High-level correction": [
+        {
+          "from": "human",
+          "value": "<image>\nHow to correct?"
+        },
+        {
+          "from": "assistant",
+          "value": "Re-align laterally before grasping the spoon."
+        }
+      ]
+    }
+  }
+}

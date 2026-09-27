@@ -1,0 +1,16 @@
+[project]
+name = "robot-deployment-intelligence"
+version = "0.0.1"
+description = "Deployment failure intelligence MVP"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
