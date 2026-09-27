@@ -1,0 +1,20 @@
+{
+  "n_episodes": 150,
+  "seed": 42,
+  "top_k": 15,
+  "robofac_sim_glob": "data/raw/robofac/test_qa_sim/annos_per_video_split*.json",
+  "robofac_real_glob": "data/raw/robofac/test_qa_realworld/annos_per_video_split*.json",
+  "use_realworld": false,
+  "min_labeled": 100,
+  "fixture_dir": "data/samples/robofac",
+  "decision_config": "configs/decision.json",
+  "proxy_config": "configs/proxy_importance.json",
+  "report_out": "reports/m0_5_thin_slice.md",
+  "_docs": {
+    "n_episodes": "Thin-slice corpus size (100–200). Sampled from labeled RoboFAC or synthetic.",
+    "seed": "Deterministic sample + split seed",
+    "top_k": "Review Top-K for ranking examples + proxy retention",
+    "use_realworld": "If true, also load test_qa_realworld (paths lack fail/success cues)",
+    "min_labeled": "Fall back to fixture/synthetic if fewer labeled RoboFAC episodes"
+  }
+}

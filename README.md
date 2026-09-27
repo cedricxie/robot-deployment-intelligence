@@ -43,3 +43,15 @@ Runnable rungs: **Random** → **Frequency-only** → **BaselineFastDecisionEngi
 Eval harness (`evaluation/harness.py`) emits side-by-side columns: detection P/R/F1, failure-type agreement, **proxy retention**, **review reduction** (Top-K). Proxy labels come from `proxy_importance` (A∧(B∨C∨D)); improvement-loop helpers still must not load `hidden_eval`.
 
 **Baseline miss modes:** renamed paths without `fail`/`success` tokens; no type keywords in path/instruction → falls back to development prior / majority type (may tie Frequency). On RoboFAC-shaped fixtures with path cues, Baseline beats Random on detection F1.
+
+## M0.5 thin slice (PR-impl-5)
+
+End-to-end: Episode → features → Random/Frequency/Baseline → proxy tagging → Top-K → `reports/m0_5_thin_slice.md`.
+
+```bash
+python scripts/m0_5_thin_slice.py --config configs/m0_5_thin_slice.json
+# optional: --top-k 20 --force-synthetic
+```
+
+Prefers labeled RoboFAC `test_qa_sim` when present; else fixture/synthetic with path cues. No API keys. **Review priority ≠ business importance.**
+
