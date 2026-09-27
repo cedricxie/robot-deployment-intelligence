@@ -1,0 +1,38 @@
+{
+  "fixture-sim-fail-omit-001": {
+    "video": "MicrowaveTask-fork/microwave_close_view3/fixture-sim-fail-omit-001.mp4",
+    "task": "MicrowaveTask",
+    "annos": {
+      "Task identification": [
+        {
+          "from": "human",
+          "value": "<image>\nWhat task?"
+        },
+        {
+          "from": "assistant",
+          "value": "Put the fork in the cup and put them in the microwave"
+        }
+      ],
+      "Failure detection": [
+        {
+          "from": "human",
+          "value": "<image>\nSuccessful?"
+        },
+        {
+          "from": "assistant",
+          "value": "No."
+        }
+      ],
+      "Failure identification": [
+        {
+          "from": "human",
+          "value": "<image>\nError type?"
+        },
+        {
+          "from": "assistant",
+          "value": "Step omission."
+        }
+      ]
+    }
+  }
+}

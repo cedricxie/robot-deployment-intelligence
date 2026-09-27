@@ -1,0 +1,28 @@
+{
+  "fixture-sim-success-001": {
+    "video": "dataset_success_cleaned/SafeTask-v1/stack_ok/fixture-sim-success-001.mp4",
+    "task": "SafeTask",
+    "annos": {
+      "Task identification": [
+        {
+          "from": "human",
+          "value": "<image>\nWhat is the robot doing?"
+        },
+        {
+          "from": "assistant",
+          "value": "Put the brick in the safe and close it."
+        }
+      ],
+      "Failure detection": [
+        {
+          "from": "human",
+          "value": "<image>\nWas the task successful?"
+        },
+        {
+          "from": "assistant",
+          "value": "Yes."
+        }
+      ]
+    }
+  }
+}
