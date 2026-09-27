@@ -1,7 +1,8 @@
-"""Eval harness skeleton: Random → Frequency → Baseline ladder columns.
+"""Eval harness: Random → Frequency → Baseline → JEV ladder columns.
 
 Emits detection P/R/F1, failure-type agreement, proxy-important retention,
-and review reduction. Uses ``proxy_importance`` for proxy labels.
+review reduction, and cost proxy (calls / tokens / stub units). Uses
+``proxy_importance`` for proxy labels.
 
 Hidden isolation: this module scores whatever Episode list the caller passes.
 Improvement-loop helpers must not load hidden_eval — callers that tune should
@@ -18,8 +19,9 @@ from data.schemas.episode import Episode
 from decision.base import DecisionConfig, DecisionResult, FastDecisionEngine, load_decision_config
 from decision.baseline import BaselineFastDecisionEngine
 from decision.frequency import FrequencyOnlyDecisionEngine
+from decision.jev import CostSnapshot, JevDecisionEngine, build_jev_engine
 from decision.random import RandomDecisionEngine
-from features.extract import FeatureExtractor, extract_features
+from features.extract import FeatureExtractor
 from proxy_importance.config import ProxyImportanceConfig, load_config as load_proxy_config
 from proxy_importance.failure_bank import FailureBank
 from proxy_importance.frequency import build_frequency_table
@@ -113,6 +115,14 @@ def proxy_retention_and_review_reduction(
     return retention, reduction, n_imp
 
 
+def engine_cost(engine: FastDecisionEngine) -> CostSnapshot:
+    """Read cost proxy from engines that track it; else zeros (local heuristics)."""
+    snap = getattr(engine, "cost_snapshot", None)
+    if callable(snap):
+        return snap()
+    return CostSnapshot()
+
+
 @dataclass
 class LadderColumn:
     backend: str
@@ -125,6 +135,9 @@ class LadderColumn:
     n_proxy_important: int
     review_top_k: int
     n_episodes: int
+    cost_calls: int = 0
+    cost_tokens: int = 0
+    cost_stub_units: float = 0.0
 
 
 @dataclass
@@ -150,6 +163,9 @@ class HarnessReport:
                 "n_proxy_important": c.n_proxy_important,
                 "review_top_k": c.review_top_k,
                 "n_episodes": c.n_episodes,
+                "cost_calls": c.cost_calls,
+                "cost_tokens": c.cost_tokens,
+                "cost_stub_units": c.cost_stub_units,
             }
             for c in self.columns
         ]
@@ -161,6 +177,7 @@ def _score_column(
     results: Sequence[DecisionResult],
     proxy_results: Sequence[ProxyReviewPriorityResult],
     top_k: int,
+    cost: CostSnapshot,
 ) -> LadderColumn:
     prf = detection_prf1(episodes, results)
     agree = failure_type_agreement(episodes, results)
@@ -179,6 +196,9 @@ def _score_column(
         n_proxy_important=n_imp,
         review_top_k=top_k,
         n_episodes=len(episodes),
+        cost_calls=cost.calls,
+        cost_tokens=cost.tokens,
+        cost_stub_units=cost.stub_units,
     )
 
 
@@ -193,7 +213,7 @@ def run_ladder(
 ) -> HarnessReport:
     """Run each engine on ``episodes``; emit side-by-side ladder columns.
 
-    ``reference_episodes`` feeds Frequency/Baseline fit + proxy frequency/bank.
+    ``reference_episodes`` feeds Frequency/Baseline/JEV fit + proxy frequency/bank.
     Defaults to ``episodes`` when omitted (fine for fixture smoke).
     """
     dcfg = decision_config or load_decision_config()
@@ -211,13 +231,16 @@ def run_ladder(
 
     report = HarnessReport()
     for engine in engines:
-        # Fit engines that support it (Frequency / Baseline) on reference only.
+        # Fit engines that support it (Frequency / Baseline / JEV) on reference only.
         fit = getattr(engine, "fit", None)
         if callable(fit):
             fit(ref)
+        reset = getattr(engine, "reset_cost", None)
+        if callable(reset):
+            reset()
         results = engine.evaluate_many(features, dcfg)
         report.columns.append(
-            _score_column(engine.name, eps, results, proxy_results, k)
+            _score_column(engine.name, eps, results, proxy_results, k, engine_cost(engine))
         )
     return report
 
@@ -229,9 +252,13 @@ class EvaluationHarness:
         self,
         decision_config: DecisionConfig | None = None,
         proxy_config: ProxyImportanceConfig | None = None,
+        *,
+        include_jev: bool | None = None,
     ) -> None:
         self.decision_config = decision_config or load_decision_config()
         self.proxy_config = proxy_config or load_proxy_config()
+        # None → respect JEV_MODE; True force stub; False skip.
+        self.include_jev = include_jev
 
     def default_engines(
         self,
@@ -248,7 +275,16 @@ class EvaluationHarness:
         )
         freq = FrequencyOnlyDecisionEngine(self.decision_config)
         base = BaselineFastDecisionEngine(self.decision_config)
-        return [rnd, freq, base]
+        engines: list[FastDecisionEngine] = [rnd, freq, base]
+        if self.include_jev is False:
+            return engines
+        if self.include_jev is True:
+            engines.append(JevDecisionEngine(self.decision_config, mode="stub"))
+            return engines
+        jev = build_jev_engine(self.decision_config)
+        if jev is not None:
+            engines.append(jev)
+        return engines
 
     def evaluate(
         self,
