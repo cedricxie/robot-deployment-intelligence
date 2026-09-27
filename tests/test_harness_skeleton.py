@@ -60,10 +60,14 @@ def test_harness_ladder_finite_metrics():
     pcfg = ProxyImportanceConfig(
         rare_freq_quantile=0.25, high_freq_min_count=3, novelty_min_score=1.0, top_k=2
     )
-    report = EvaluationHarness(dcfg, pcfg).evaluate(
+    report = EvaluationHarness(dcfg, pcfg, include_jev=True).evaluate(
         eval_eps, reference_episodes=ref, top_k=2
     )
-    assert [c.backend for c in report.columns] == ["random", "frequency", "baseline"]
+    assert [c.backend for c in report.columns] == ["random", "frequency", "baseline", "jev"]
+    jev = report.column("jev")
+    assert jev is not None
+    assert jev.cost_calls == len(eval_eps)
+    assert jev.cost_stub_units > 0
     for col in report.columns:
         for val in (
             col.detection_precision,
@@ -100,4 +104,7 @@ def test_run_ladder_rows_have_expected_keys():
         "proxy_retention",
         "review_reduction",
         "failure_type_agreement",
+        "cost_calls",
+        "cost_tokens",
+        "cost_stub_units",
     }

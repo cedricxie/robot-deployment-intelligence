@@ -33,12 +33,19 @@ class DecisionConfig:
         }
     )
     default_fail_probability: float = 0.5
+    # JEV stub cost–quality knobs (ignored by cheaper ladder rungs).
+    jev_stub_cost_units: float = 10.0
+    jev_stub_token_overhead: int = 16
 
     def __post_init__(self) -> None:
         if self.review_top_k < 1:
             raise ValueError("review_top_k must be >= 1")
         if not 0.0 <= self.default_fail_probability <= 1.0:
             raise ValueError("default_fail_probability must be in [0, 1]")
+        if self.jev_stub_cost_units < 0:
+            raise ValueError("jev_stub_cost_units must be >= 0")
+        if self.jev_stub_token_overhead < 0:
+            raise ValueError("jev_stub_token_overhead must be >= 0")
 
 
 def load_decision_config(path: str | Path | None = None) -> DecisionConfig:

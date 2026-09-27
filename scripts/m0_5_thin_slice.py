@@ -262,7 +262,8 @@ def run_thin_slice(
         top_k=k,
     )
 
-    harness = EvaluationHarness(dcfg, pcfg)
+    # M0.5 ladder stops at Baseline; JEV cost–quality column lands in M1 (PR-impl-6).
+    harness = EvaluationHarness(dcfg, pcfg, include_jev=False)
     report = harness.evaluate(eval_eps, reference_episodes=development, top_k=k)
 
     # Baseline results + proxy for ranking examples.
