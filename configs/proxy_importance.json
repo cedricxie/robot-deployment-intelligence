@@ -1,0 +1,12 @@
+{
+  "rare_freq_quantile": 0.25,
+  "high_freq_min_count": 3,
+  "novelty_min_score": 1.0,
+  "top_k": 10,
+  "_docs": {
+    "rare_freq_quantile": "B: failure_type whose count among reference fails is at/below this empirical quantile of per-type counts",
+    "high_freq_min_count": "C: failure_type absolute count among reference fails >= this",
+    "novelty_min_score": "D: novelty_score >= this (unseen type vs Failure Bank -> 1.0)",
+    "top_k": "Report Top-K proxy-important episode ids"
+  }
+}
