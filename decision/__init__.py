@@ -3,7 +3,12 @@
 from decision.base import DecisionConfig, DecisionResult, FastDecisionEngine, load_decision_config
 from decision.baseline import BaselineFastDecisionEngine
 from decision.frequency import FrequencyOnlyDecisionEngine
-from decision.jev import JevDecisionEngine, build_jev_engine, resolve_jev_mode
+from decision.jev import (
+    JevDecisionEngine,
+    build_jev_engine,
+    llm_proxy_judge,
+    resolve_jev_mode,
+)
 from decision.random import RandomDecisionEngine
 
 __all__ = [
@@ -17,4 +22,5 @@ __all__ = [
     "JevDecisionEngine",
     "build_jev_engine",
     "resolve_jev_mode",
+    "llm_proxy_judge",
 ]
