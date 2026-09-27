@@ -1,4 +1,4 @@
-"""JEV stub: deterministic, GT-free, mode switch, harness cost column."""
+"""JEV stub + real (mocked HTTP): deterministic, GT-free, mode switch, harness cost."""
 
 from __future__ import annotations
 
@@ -9,7 +9,15 @@ import pytest
 
 from data.schemas.episode import Episode, GroundTruth
 from decision.base import DecisionConfig
-from decision.jev import JevDecisionEngine, build_jev_engine, resolve_jev_mode
+from decision.jev import (
+    JevDecisionEngine,
+    build_jev_engine,
+    build_systemone_payload,
+    features_to_state,
+    map_systemone_response,
+    resolve_jev_api_key,
+    resolve_jev_mode,
+)
 from evaluation.harness import EvaluationHarness
 from features.extract import extract_features
 from proxy_importance.config import ProxyImportanceConfig
@@ -40,6 +48,16 @@ def test_resolve_jev_mode_default_and_aliases(monkeypatch):
     assert resolve_jev_mode("weird") == "stub"
 
 
+def test_resolve_jev_api_key_aliases(monkeypatch):
+    monkeypatch.delenv("JEV_AGENT_KEY", raising=False)
+    monkeypatch.delenv("JEV_API_KEY", raising=False)
+    assert resolve_jev_api_key() is None
+    monkeypatch.setenv("JEV_API_KEY", "alias-key")
+    assert resolve_jev_api_key() == "alias-key"
+    monkeypatch.setenv("JEV_AGENT_KEY", "primary-key")
+    assert resolve_jev_api_key() == "primary-key"
+
+
 def test_build_jev_off_returns_none():
     assert build_jev_engine(mode="off") is None
     eng = build_jev_engine(mode="stub")
@@ -47,10 +65,107 @@ def test_build_jev_off_returns_none():
     assert eng.mode == "stub"
 
 
-def test_jev_real_raises_clear_error():
+def test_jev_real_missing_key_raises(monkeypatch):
+    monkeypatch.delenv("JEV_AGENT_KEY", raising=False)
+    monkeypatch.delenv("JEV_API_KEY", raising=False)
     eng = JevDecisionEngine(DecisionConfig(), mode="real")
-    with pytest.raises(RuntimeError, match="not implemented"):
+    with pytest.raises(RuntimeError, match="JEV_AGENT_KEY or JEV_API_KEY"):
         eng.evaluate(extract_features(_ep("x", False, video="fail/x.mp4")))
+
+
+def test_jev_real_mocked_http_maps_noul_and_choice(monkeypatch):
+    monkeypatch.setenv("JEV_AGENT_KEY", "test-key-not-real")
+    captured: dict = {}
+
+    def fake_post(payload, *, api_key, base_url, timeout_s):
+        captured["payload"] = payload
+        captured["api_key"] = api_key
+        captured["base_url"] = base_url
+        return {
+            "model": "jev-1.13.0",
+            "answers": {
+                "is_fail": {"type": "noul", "noul": 0.91},
+                "fail_type": {
+                    "type": "choice",
+                    "choice": "grasping_error",
+                    "confidence": 0.8,
+                    "probabilities": {"grasping_error": 0.8, "other": 0.2},
+                },
+            },
+            "usage": {"input_tokens": 420, "output_tokens": 40},
+            "quota": {"used": 2, "limit": 50, "remaining": 48, "month": "2026-09"},
+        }
+
+    eng = JevDecisionEngine(
+        DecisionConfig(), mode="real", http_post=fake_post, base_url="https://example.test/api"
+    )
+    feats = extract_features(
+        _ep("f1", False, "grasping_error", "path/ep.mp4", instruction="pick cup")
+    )
+    result = eng.evaluate(feats)
+    assert result.predicted_success is False
+    assert result.failure_probability == pytest.approx(0.91)
+    assert result.failure_type == "grasping_error"
+    assert "jev_real" in result.evidence
+    snap = eng.cost_snapshot()
+    assert snap.calls == 1
+    assert snap.tokens == 420
+    assert snap.stub_units == 0.0
+    q = eng.quota_snapshot()
+    assert q.remaining == 48
+    assert q.used == 2
+    # Payload is GT-free
+    state = captured["payload"]["state"]
+    assert "pick cup" in state
+    assert "ground_truth" not in state.lower()
+    assert "success:" not in state.lower()
+    assert captured["api_key"] == "test-key-not-real"
+
+
+def test_jev_real_noul_below_half_is_success(monkeypatch):
+    monkeypatch.setenv("JEV_AGENT_KEY", "test-key-not-real")
+
+    def fake_post(payload, *, api_key, base_url, timeout_s):
+        return {
+            "model": "jev-1.13.0",
+            "answers": {
+                "is_fail": {"type": "noul", "noul": 0.12},
+                "fail_type": {"type": "choice", "choice": "other", "confidence": 0.5},
+            },
+            "usage": {"input_tokens": 100, "output_tokens": 10},
+        }
+
+    eng = JevDecisionEngine(mode="real", http_post=fake_post)
+    r = eng.evaluate(extract_features(_ep("ok", True, video="success/a.mp4")))
+    assert r.predicted_success is True
+    assert r.failure_type is None
+    assert r.failure_probability == pytest.approx(0.12)
+
+
+def test_map_systemone_and_state_helpers():
+    feats = extract_features(_ep("e1", False, video="fail/x.mp4", instruction="stack"))
+    state = features_to_state(feats)
+    assert "episode_id: e1" in state
+    assert "instruction: stack" in state
+    payload = build_systemone_payload(feats)
+    assert "is_fail" in payload["questions"]
+    assert payload["questions"]["fail_type"]["type"] == "choice"
+
+    result, toks, quota = map_systemone_response(
+        {
+            "answers": {
+                "is_fail": {"type": "noul", "noul": 0.7},
+                "fail_type": {"type": "choice", "choice": "step_omission"},
+            },
+            "usage": {"input_tokens": 55},
+            "quota": {"remaining": 3},
+        },
+        episode_id="e1",
+    )
+    assert toks == 55
+    assert quota.remaining == 3
+    assert result.failure_type == "step_omission"
+    assert result.predicted_success is False
 
 
 def test_jev_stub_gt_free_path_and_instr_cues():

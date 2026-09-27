@@ -39,18 +39,26 @@ Runnable rungs: **Random** → **Frequency-only** → **BaselineFastDecisionEngi
 | Random | Seeded Bernoulli success/fail + uniform type |
 | Frequency-only | Majority success/fail + most-common fail type from **development** reference empirical freqs (constant predictor) |
 | BaselineFast | GT-free path/id keyword cues (+ optional prior / type keywords). Default ship path |
-| JEV (stub) | GT-free path + instruction cues with cost proxy (calls / tokens / stub units). Cost–quality experiment — **not** assumed superior. Modes: stub (default), off, real (raises until adapter exists) |
+| JEV | Stub: GT-free path + instruction cues + stub cost units. Real: `POST` Jev Agent `/api/v1/systemone` (`JEV_MODE=real`, `JEV_AGENT_KEY` / `JEV_API_KEY`). Cost–quality experiment — **not** assumed superior. Modes: stub (default), off, real |
 
 Eval harness (`evaluation/harness.py`) emits side-by-side columns: detection P/R/F1, failure-type agreement, **proxy retention**, **review reduction** (Top-K), **cost proxy**. Proxy labels come from `proxy_importance` (A∧(B∨C∨D)); improvement-loop helpers still must not load `hidden_eval`.
 
 **Baseline miss modes:** renamed paths without `fail`/`success` tokens; no type keywords in path/instruction → falls back to development prior / majority type (may tie Frequency). On RoboFAC-shaped fixtures with path cues, Baseline beats Random on detection F1.
 
-### M1 failure intelligence (PR-impl-6)
+### M1 failure intelligence (PR-impl-6 + real adapter)
 
 Full ladder + cost–quality report (`reports/m1_failure_intelligence.md`):
 
 ```bash
 JEV_MODE=stub python scripts/m1_failure_intelligence.py --config configs/m1_failure_intelligence.json
+```
+
+Real JEV micro (≤4 live calls; free-tier safe):
+
+```bash
+export JEV_MODE=real
+# JEV_AGENT_KEY or JEV_API_KEY must already be set — never echo it.
+python scripts/m1_jev_real_micro.py --max-real-calls 4
 ```
 
 ## M0.5 thin slice (PR-impl-5)
