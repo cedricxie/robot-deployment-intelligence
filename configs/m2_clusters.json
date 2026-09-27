@@ -1,0 +1,25 @@
+{
+  "n_episodes": 150,
+  "seed": 42,
+  "robofac_sim_glob": "data/raw/robofac/test_qa_sim/annos_per_video_split*.json",
+  "robofac_real_glob": "data/raw/robofac/test_qa_realworld/annos_per_video_split*.json",
+  "use_realworld": false,
+  "min_labeled": 100,
+  "fixture_dir": "data/samples/robofac",
+  "proxy_config": "configs/proxy_importance.json",
+  "ranking_config": "configs/ranking_weights.json",
+  "bank_out": "data/artifacts/failure_bank.jsonl",
+  "report_out": "reports/m2_clusters.md",
+  "embed_dim": 64,
+  "n_clusters": null,
+  "distance_threshold": 0.8,
+  "linkage": "average",
+  "cluster_source": "eval_fails",
+  "_docs": {
+    "cluster_source": "eval_fails = cluster public_eval-style fails; bank seeded from development fails",
+    "n_clusters": "If null, stop by distance_threshold (average linkage)",
+    "distance_threshold": "Cosine distance; merge while next merge \u2264 threshold (0.80 \u2248 mild compression on RoboFAC paths)",
+    "honesty": "Purity = label consistency vs failure_type only \u2014 not engineering usefulness",
+    "purity": "Report purity_labeled (ignore_none) as primary \u2014 many RoboFAC fails lack mapped failure_type"
+  }
+}

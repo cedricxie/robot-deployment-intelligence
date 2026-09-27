@@ -1,0 +1,18 @@
+{
+  "a": 1.0,
+  "b": 1.0,
+  "c": 1.0,
+  "d": 1.5,
+  "e": 0.5,
+  "f": 0.5,
+  "require_a": true,
+  "prefer_proxy_important": true,
+  "proxy_important_boost": 2.0,
+  "_docs": {
+    "a_d": "Acceptance-set rule hit weights (proxy_important ⇔ A ∧ (B∨C∨D))",
+    "e_f": "Ranking bonuses only — never admit into proxy-important set",
+    "require_a": "Non-failures score 0",
+    "prefer_proxy_important": "Extra boost for admitted cases so Top-K favors the set",
+    "honesty": "Review-priority ranking ≠ business importance"
+  }
+}
