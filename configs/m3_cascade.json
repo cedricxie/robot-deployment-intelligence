@@ -1,0 +1,19 @@
+{
+  "n_episodes": 150,
+  "seed": 42,
+  "robofac_sim_glob": "data/raw/robofac/test_qa_sim/annos_per_video_split*.json",
+  "robofac_real_glob": "data/raw/robofac/test_qa_realworld/annos_per_video_split*.json",
+  "use_realworld": false,
+  "min_labeled": 100,
+  "fixture_dir": "data/samples/robofac",
+  "decision_config": "configs/decision.json",
+  "proxy_config": "configs/proxy_importance.json",
+  "routing_config": "configs/cascade_routing.json",
+  "report_out": "reports/m3_cascade.md",
+  "fast_backends": ["baseline", "jev"],
+  "_docs": {
+    "split": "Same thin-slice 70/30 development vs public_eval-style; hidden_eval never loaded",
+    "strategies": "A=all-deep; B=cheap→fast→deep with routing budget",
+    "proxy_important_recall": "Fail-detection recall on proxy-important subset; drop = A − B must be ≤ 0.05"
+  }
+}

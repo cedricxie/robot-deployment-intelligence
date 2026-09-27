@@ -14,7 +14,7 @@ without training robot policies.
 - [ ] M0.5 End-to-end thin slice
 - [ ] M1 Failure intelligence (JEV stub ladder report landed; full M1 ship bar still open)
 - [x] M2 Failure bank + clustering (PR-impl-7: bank + agglomerative + purity report)
-- [ ] M3 Cascade economics
+- [x] M3 Cascade economics (PR-impl-8: cheap→fast→deep + cost metrics)
 - [ ] M4 Evaluator improvement loop
 - [ ] M5 Demo + Streamlit + final report
 
@@ -82,4 +82,17 @@ python scripts/m2_cluster_report.py --config configs/m2_clusters.json
 ```
 
 Report: `reports/m2_clusters.md`. Artifact: `data/artifacts/failure_bank.jsonl` (gitignored). **Review priority ≠ business importance.**
+
+
+## M3 cascade economics (PR-impl-8)
+
+Cheap → fast → deep routing with A (all-deep) vs B (cascade) comparison. Mock `VisionReasoningProvider` / `DeepReasoner` (no API keys). Configurable policy in `configs/cascade_routing.json`.
+
+```bash
+JEV_MODE=stub python scripts/m3_cascade_report.py --config configs/m3_cascade.json
+# optional: --force-synthetic
+```
+
+Report: `reports/m3_cascade.md` — deep-call speedup, cost proxy per ladder backend, proxy-important recall delta. **Review priority ≠ business importance.**
+
 

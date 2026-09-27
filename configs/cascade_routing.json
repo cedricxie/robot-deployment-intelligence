@@ -1,0 +1,21 @@
+{
+  "cheap_stop_confidence": 0.8,
+  "fast_stop_confidence": 0.8,
+  "escalate_if_uncertain": true,
+  "escalate_if_needs_deep_review": false,
+  "escalate_if_proxy_important": false,
+  "uncertain_if_no_path_cue": true,
+  "max_deep_fraction": 0.20,
+  "max_deep_calls": null,
+  "prefer_proxy_important_in_budget": true,
+  "cost_units_cheap": 0.1,
+  "cost_units_fast_baseline": 1.0,
+  "cost_units_fast_jev": 10.0,
+  "cost_units_deep": 50.0,
+  "_docs": {
+    "uncertain_if_no_path_cue": "Prior-only / abstain fast results count as uncertain even if numeric confidence is high",
+    "max_deep_fraction": "Deep budget = floor(n_episodes * fraction); candidates ranked by proxy-important then uncertainty",
+    "escalate_if_*": "Candidate flags before budget trim; defaults escalate only uncertain",
+    "honesty": "Review-priority / proxy-important ≠ business importance; routing must not load hidden_eval"
+  }
+}
