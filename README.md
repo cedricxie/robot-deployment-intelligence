@@ -29,3 +29,17 @@ without training robot policies.
 Goals-first · Evaluator-first · Data-first · API-first · Modular · Measurable · Reproducible
 
 API keys (when used) come from environment variables only. The pipeline must run with mock providers when keys are absent.
+
+## Decision ladder (PR-impl-4)
+
+Runnable rungs: **Random** → **Frequency-only** → **BaselineFastDecisionEngine** (JEV later).
+
+| Rung | Behavior |
+|------|----------|
+| Random | Seeded Bernoulli success/fail + uniform type |
+| Frequency-only | Majority success/fail + most-common fail type from **development** reference empirical freqs (constant predictor) |
+| BaselineFast | GT-free path/id keyword cues (+ optional prior / type keywords). Default ship path |
+
+Eval harness (`evaluation/harness.py`) emits side-by-side columns: detection P/R/F1, failure-type agreement, **proxy retention**, **review reduction** (Top-K). Proxy labels come from `proxy_importance` (A∧(B∨C∨D)); improvement-loop helpers still must not load `hidden_eval`.
+
+**Baseline miss modes:** renamed paths without `fail`/`success` tokens; no type keywords in path/instruction → falls back to development prior / majority type (may tie Frequency). On RoboFAC-shaped fixtures with path cues, Baseline beats Random on detection F1.
