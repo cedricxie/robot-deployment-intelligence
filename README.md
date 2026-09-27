@@ -13,7 +13,7 @@ without training robot policies.
 - [ ] M0 Dataset pipeline
 - [ ] M0.5 End-to-end thin slice
 - [ ] M1 Failure intelligence (JEV stub ladder report landed; full M1 ship bar still open)
-- [ ] M2 Failure bank + clustering
+- [x] M2 Failure bank + clustering (PR-impl-7: bank + agglomerative + purity report)
 - [ ] M3 Cascade economics
 - [ ] M4 Evaluator improvement loop
 - [ ] M5 Demo + Streamlit + final report
@@ -71,4 +71,15 @@ python scripts/m0_5_thin_slice.py --config configs/m0_5_thin_slice.json
 ```
 
 Prefers labeled RoboFAC `test_qa_sim` when present; else fixture/synthetic with path cues. No API keys. **Review priority ≠ business importance.**
+
+## M2 failure bank + clustering (PR-impl-7)
+
+JSONL `FailureCase` store, GT-free bag-of-tokens clustering, auto purity vs `failure_type` (**label consistency only** — not eng usefulness). Ranking weights honor A–D set + E/F bonuses. No Streamlit.
+
+```bash
+python scripts/m2_cluster_report.py --config configs/m2_clusters.json
+# optional: --force-synthetic
+```
+
+Report: `reports/m2_clusters.md`. Artifact: `data/artifacts/failure_bank.jsonl` (gitignored). **Review priority ≠ business importance.**
 
