@@ -226,7 +226,10 @@ def run_ladder(
     bank = FailureBank.from_episodes(ref)
     proxy_results = score_episodes(eps, freq=freq_table, bank=bank, config=pcfg)
 
-    extractor = FeatureExtractor()
+    # Config flag forces ablation; otherwise LEAK_ABLATE env may still apply.
+    extractor = FeatureExtractor(
+        ablate_path_leak=True if getattr(dcfg, "ablate_path_leak", False) else None
+    )
     features = extractor.extract_many(eps)
 
     report = HarnessReport()

@@ -14,6 +14,7 @@
   "default_fail_probability": 0.5,
   "jev_stub_cost_units": 10.0,
   "jev_stub_token_overhead": 16,
+  "ablate_path_leak": false,
   "_docs": {
     "random_seed": "Seed for RandomDecisionEngine",
     "review_top_k": "Harness Top-K review set size for proxy retention / review reduction",
@@ -22,6 +23,7 @@
     "type_keywords": "Baseline/JEV: keyword → canonical failure_type from path/instruction",
     "default_fail_probability": "Prior when path cues absent and no reference fit",
     "jev_stub_cost_units": "Stub cost units charged per JEV evaluate() call",
-    "jev_stub_token_overhead": "Fixed stub token overhead per call (plus instruction_len//4)"
+    "jev_stub_token_overhead": "Fixed stub token overhead per call (plus instruction_len//4)",
+    "ablate_path_leak": "When true (or LEAK_ABLATE=1), strip success/fail path directory cues from path_text"
   }
 }

@@ -6,6 +6,11 @@ from dataclasses import dataclass
 from typing import Iterable
 
 from data.schemas.episode import Episode
+from features.sanitize import (
+    collect_leak_tokens,
+    path_leak_ablate_enabled,
+    sanitize_path_text,
+)
 
 
 @dataclass(frozen=True)
@@ -22,12 +27,28 @@ class EpisodeFeatures:
     has_failure_subtask_meta: bool
 
 
-def extract_features(episode: Episode) -> EpisodeFeatures:
-    """Extract features without reading ``ground_truth`` / ``model_output``."""
+def extract_features(
+    episode: Episode,
+    *,
+    ablate_path_leak: bool | None = None,
+    leak_tokens: Iterable[str] | None = None,
+) -> EpisodeFeatures:
+    """Extract features without reading ``ground_truth`` / ``model_output``.
+
+    When path-leak ablation is on (``ablate_path_leak=True`` or ``LEAK_ABLATE=1``),
+    success/fail directory cues are stripped from ``path_text``.
+    """
     paths = [p or "" for p in episode.video_paths]
     frames = episode.frames or []
     instruction = episode.instruction
     path_text = " ".join([episode.episode_id, *paths]).lower()
+    if path_leak_ablate_enabled(ablate_path_leak):
+        tokens = (
+            tuple(leak_tokens)
+            if leak_tokens is not None
+            else collect_leak_tokens()
+        )
+        path_text = sanitize_path_text(path_text, tokens)
     meta = episode.metadata or {}
     return EpisodeFeatures(
         episode_id=episode.episode_id,
@@ -44,8 +65,11 @@ def extract_features(episode: Episode) -> EpisodeFeatures:
 class FeatureExtractor:
     """Thin wrapper matching plan §6.2 ``FeatureExtractor.extract``."""
 
+    def __init__(self, *, ablate_path_leak: bool | None = None) -> None:
+        self.ablate_path_leak = ablate_path_leak
+
     def extract(self, episode: Episode) -> EpisodeFeatures:
-        return extract_features(episode)
+        return extract_features(episode, ablate_path_leak=self.ablate_path_leak)
 
     def extract_many(self, episodes: Iterable[Episode]) -> list[EpisodeFeatures]:
         return [self.extract(ep) for ep in episodes]
