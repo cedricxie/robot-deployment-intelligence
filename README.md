@@ -8,7 +8,7 @@ without training robot policies.
 
 ## Status
 
-- [x] Implementation plan (`docs/mvp-plan.md`) — rev 5 (automatable core + proxy importance + Baseline↔JEV comparison)
+- [x] Implementation plan (`docs/mvp-plan.md`) — rev 6 (proxy-important / review-priority + baseline ladder + impl PR plan)
 - [ ] M0 Dataset pipeline
 - [ ] M0.5 End-to-end thin slice
 - [ ] M1 Failure intelligence
