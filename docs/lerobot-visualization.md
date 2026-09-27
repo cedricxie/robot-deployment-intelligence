@@ -79,38 +79,27 @@ Sim task text comes from `training_qa.json` when available; each string is tagge
 `[success]` / `[failure]`. Realworld NL hints come from `test_qa_realworld/` when present.
 Native realworld resolution (e.g. 640×480) may differ from sim (1024×1024) — preview only.
 
-## Upload to Hugging Face Hub
+## Hub dataset (already uploaded)
+
+Preview is live on the Hub:
+
+- Dataset: [`cedricxie/robofac-lerobot-preview`](https://huggingface.co/datasets/cedricxie/robofac-lerobot-preview)
+- Visualizer: https://lerobot-visualize-dataset.hf.space/cedricxie/robofac-lerobot-preview
+
+(Do not use `huggingface.co/spaces/lerobot/visualize_dataset/...` deep links — they 404.)
+
+To **re-upload** after regenerating locally:
 
 ```bash
 # one-time auth (do NOT paste tokens into chat)
 huggingface-cli login
 # or: export HF_TOKEN=hf_...
 
-# upload local folder as a dataset repo
 huggingface-cli upload cedricxie/robofac-lerobot-preview \
   data/processed/robofac_lerobot_preview \
   --repo-type dataset
-
-# or via Python
-python - <<'PY'
-from pathlib import Path
-from huggingface_hub import HfApi
-api = HfApi()
-api.create_repo('cedricxie/robofac-lerobot-preview', repo_type='dataset', exist_ok=True)
-api.upload_folder(
-    folder_path='data/processed/robofac_lerobot_preview',
-    repo_id='cedricxie/robofac-lerobot-preview',
-    repo_type='dataset',
-)
-PY
 ```
 
-Then open:
-
-https://lerobot-visualize-dataset.hf.space/cedricxie/robofac-lerobot-preview
-
-If Grok Bot needs a write token later, use the secret-request flow rather than
-pasting `HF_TOKEN` into chat.
 
 ## Extending to other datasets
 

@@ -43,4 +43,7 @@ Or set `HF_TOKEN` for higher rate limits.
 
 ## LeRobot visualization preview
 
-See [`docs/lerobot-visualization.md`](../docs/lerobot-visualization.md). Converter: `scripts/convert_robofac_to_lerobot.py`. Local output (gitignored): `data/processed/robofac_lerobot_preview/` (LeRobot v3.0, ~32 episodes). Hub target: `cedricxie/robofac-lerobot-preview`.
+See [`docs/lerobot-visualization.md`](../docs/lerobot-visualization.md). Converter: `scripts/convert_robofac_to_lerobot.py`. Local output (gitignored): `data/processed/robofac_lerobot_preview/` (LeRobot v3.0, ~32 episodes).
+
+- Hub: [`cedricxie/robofac-lerobot-preview`](https://huggingface.co/datasets/cedricxie/robofac-lerobot-preview) (already uploaded)
+- Viz: https://lerobot-visualize-dataset.hf.space/cedricxie/robofac-lerobot-preview

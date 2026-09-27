@@ -976,7 +976,7 @@ def main() -> None:
 
     print(f"Done. Dataset at {out_dir}")
     print(
-        "Visualizer URL (after Hub upload): "
+        "Visualizer: "
         f"https://lerobot-visualize-dataset.hf.space/{args.repo_id}"
     )
 
