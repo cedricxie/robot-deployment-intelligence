@@ -36,6 +36,8 @@ class DecisionConfig:
     # JEV stub cost–quality knobs (ignored by cheaper ladder rungs).
     jev_stub_cost_units: float = 10.0
     jev_stub_token_overhead: int = 16
+    # When True, feature extract strips success/fail path directory cues.
+    ablate_path_leak: bool = False
 
     def __post_init__(self) -> None:
         if self.review_top_k < 1:
@@ -65,6 +67,25 @@ def load_decision_config(path: str | Path | None = None) -> DecisionConfig:
         else:
             kwargs[k] = v
     return DecisionConfig(**kwargs)
+
+
+def with_path_leak_ablation(cfg: DecisionConfig) -> DecisionConfig:
+    """Copy config with path cue lists emptied + ``ablate_path_leak=True``.
+
+    Emptied tokens stop Baseline/stub from re-matching; feature extract also
+    strips folder cues (and llm_proxy hardcoded path semantics that overlap).
+    """
+    return DecisionConfig(
+        random_seed=cfg.random_seed,
+        review_top_k=cfg.review_top_k,
+        fail_path_tokens=(),
+        success_path_tokens=(),
+        type_keywords=cfg.type_keywords,
+        default_fail_probability=cfg.default_fail_probability,
+        jev_stub_cost_units=cfg.jev_stub_cost_units,
+        jev_stub_token_overhead=cfg.jev_stub_token_overhead,
+        ablate_path_leak=True,
+    )
 
 
 def config_to_dict(cfg: DecisionConfig) -> dict:

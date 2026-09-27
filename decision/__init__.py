@@ -1,6 +1,12 @@
 """Decision ladder: Random → Frequency-only → BaselineFast → JEV."""
 
-from decision.base import DecisionConfig, DecisionResult, FastDecisionEngine, load_decision_config
+from decision.base import (
+    DecisionConfig,
+    DecisionResult,
+    FastDecisionEngine,
+    load_decision_config,
+    with_path_leak_ablation,
+)
 from decision.baseline import BaselineFastDecisionEngine
 from decision.frequency import FrequencyOnlyDecisionEngine
 from decision.jev import (
@@ -16,6 +22,7 @@ __all__ = [
     "DecisionResult",
     "FastDecisionEngine",
     "load_decision_config",
+    "with_path_leak_ablation",
     "RandomDecisionEngine",
     "FrequencyOnlyDecisionEngine",
     "BaselineFastDecisionEngine",

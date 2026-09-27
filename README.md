@@ -53,6 +53,18 @@ Full ladder + cost–quality report (`reports/m1_failure_intelligence.md`):
 JEV_MODE=stub python scripts/m1_failure_intelligence.py --config configs/m1_failure_intelligence.json
 ```
 
+
+### Path-label leakage ablation
+
+RoboFAC folder names (`dataset_success_cleaned`, `stack_ok`, `fail`, …) leak GT into `path_text`. Strip them and compare:
+
+```bash
+python scripts/m1_leak_ablation.py
+# or: LEAK_ABLATE=1 on feature extract / DecisionConfig.ablate_path_leak=true
+```
+
+Report: `reports/m1_leak_ablation.md`. **Ablated metrics are the fairer detection ceiling**; leaked F1≈1 was path leakage. Career review pending before merge.
+
 ### M1 JEV llm_proxy (role-play)
 
 Baseline vs deterministic systemone-shaped judge (`reports/m1_jev_llm_proxy.md`). **Not** live Jev API.
