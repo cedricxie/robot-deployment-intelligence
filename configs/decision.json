@@ -1,0 +1,23 @@
+{
+  "random_seed": 42,
+  "review_top_k": 5,
+  "fail_path_tokens": ["fail", "failure"],
+  "success_path_tokens": ["success", "success_cleaned", "stack_ok"],
+  "type_keywords": {
+    "position_deviation": ["position", "pos", "lateral", "offset"],
+    "orientation_deviation": ["orientation", "orient", "rotation"],
+    "step_omission": ["omission", "omit", "skipped", "missing_step"],
+    "wrong_target_object": ["wrong_target", "wrong_object"],
+    "timing_error": ["timing", "early", "late"],
+    "grasping_error": ["grasp", "gripper", "slip"]
+  },
+  "default_fail_probability": 0.5,
+  "_docs": {
+    "random_seed": "Seed for RandomDecisionEngine",
+    "review_top_k": "Harness Top-K review set size for proxy retention / review reduction",
+    "fail_path_tokens": "Baseline: path/id substrings → predict fail",
+    "success_path_tokens": "Baseline: path/id substrings → predict success",
+    "type_keywords": "Baseline: keyword → canonical failure_type from path/instruction",
+    "default_fail_probability": "Prior when path cues absent and no reference fit"
+  }
+}
