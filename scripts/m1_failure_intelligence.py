@@ -136,14 +136,13 @@ def run_m1(
     harness = EvaluationHarness(dcfg, pcfg, include_jev=False)
     engines = harness.default_engines(development)
     report_mode = mode
-    if mode == "real":
+    if report_mode == "real":
         notes.append(
-            "JEV_MODE=real requested but real adapter is not implemented; "
-            "report uses stub (acceptance: stub path always runnable)."
+            "JEV_MODE=real — each eval episode calls systemone (costs credits). "
+            "Prefer scripts/m1_jev_real_micro.py for a capped free-tier smoke."
         )
-        report_mode = "stub"
     if report_mode != "off":
-        engines.append(JevDecisionEngine(dcfg, mode="stub"))
+        engines.append(JevDecisionEngine(dcfg, mode=report_mode))  # type: ignore[arg-type]
 
     report = harness.evaluate(
         eval_eps, reference_episodes=development, engines=engines, top_k=k
@@ -157,7 +156,7 @@ def run_m1(
         n_development=len(development),
         n_eval=len(eval_eps),
         top_k=k,
-        jev_mode=report_mode if mode != "real" else "stub (real unavailable)",
+        jev_mode=report_mode,
         eval_split_name="public_eval",
         harness=report,
         n_gt_fails_eval=n_gt_fails,
@@ -194,7 +193,7 @@ def render_report(result: M1Result) -> str:
         f"| Eval split | `{result.eval_split_name}` (holdout) n={result.n_eval} |",
         f"| Top-K | {result.top_k} |",
         f"| JEV mode | `{result.jev_mode}` |",
-        f"| API keys | none required (stub) |",
+        f"| API keys | {'JEV_AGENT_KEY required' if result.jev_mode == 'real' else 'none required (stub)'} |",
         "",
         "### Notes",
         "",
